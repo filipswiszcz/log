@@ -13,11 +13,11 @@ typedef struct {
 
 enum { DEBUG, INFO, WARN, FATAL };
 
-#define log_debug(...) send(DEBUG, __VA_ARGS__)
-#define log_info(...) send(INFO, __VA_ARGS__)
-#define log_warn(...) send(WARN, __VA_ARGS__)
-#define log_fatal(...) send(FATAL, __VA_ARGS__)
+#define log_debug(...) call_event(DEBUG, __VA_ARGS__)
+#define log_info(...) call_event(INFO, __VA_ARGS__)
+#define log_warn(...) call_event(WARN, __VA_ARGS__)
+#define log_fatal(...) call_event(FATAL, __VA_ARGS__)
 
-void send(int type, const char *frmt, ...);
+void call_event(int type, const char *frmt, ...);
 
 #endif
