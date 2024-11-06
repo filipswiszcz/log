@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
+#include <stdbool.h>
 #include <time.h>
 
 typedef struct {
@@ -10,6 +12,31 @@ typedef struct {
     const char* frmt;
     struct tm *time;
 } log_event;
+
+typedef struct queue_node queue_node;
+
+struct queue_node {
+    log_event* evt;
+    queue_node* next;
+};
+
+typedef struct {
+    queue_node* front;
+    queue_node* rear;
+    int size;
+} queue;
+
+queue queue_init();
+
+bool is_queue_empty(queue* q);
+
+int queue_size(queue* q);
+
+log_event* queue_peek(queue* q);
+
+void enqueue(queue* q, log_event evt);
+
+log_event* dequeue(queue* q);
 
 enum { DEBUG, INFO, WARN, FATAL };
 
