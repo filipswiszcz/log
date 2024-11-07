@@ -5,7 +5,10 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <time.h>
+
+#define LOG_FILE_PATH "/var/log/run.log"
 
 typedef struct {
     int type;
@@ -13,38 +16,38 @@ typedef struct {
     struct tm *time;
 } log_event;
 
-typedef struct queue_node queue_node;
+typedef struct log_queue_node log_queue_node;
 
-struct queue_node {
+struct log_queue_node {
     log_event* evt;
-    queue_node* next;
+    log_queue_node* next;
 };
 
 typedef struct {
-    queue_node* front;
-    queue_node* rear;
+    log_queue_node* front;
+    log_queue_node* rear;
     int size;
-} queue;
+} log_queue;
 
-queue queue_init();
+log_queue log_queue_init();
 
-bool is_queue_empty(queue* q);
+bool is_log_queue_empty(log_queue* q);
 
-int queue_size(queue* q);
+int log_queue_size(log_queue* q);
 
-log_event* queue_peek(queue* q);
+log_event* log_queue_peek(log_queue* q);
 
-void enqueue(queue* q, log_event evt);
+void log_enqueue(log_queue* q, log_event evt);
 
-log_event* dequeue(queue* q);
+log_event* log_dequeue(log_queue* q);
 
 enum { DEBUG, INFO, WARN, FATAL };
 
-#define log_debug(...) call_event(DEBUG, __VA_ARGS__)
-#define log_info(...) call_event(INFO, __VA_ARGS__)
-#define log_warn(...) call_event(WARN, __VA_ARGS__)
-#define log_fatal(...) call_event(FATAL, __VA_ARGS__)
+#define log_debug(...) call_log_event(DEBUG, __VA_ARGS__)
+#define log_info(...) call_log_event(INFO, __VA_ARGS__)
+#define log_warn(...) call_log_event(WARN, __VA_ARGS__)
+#define log_fatal(...) call_log_event(FATAL, __VA_ARGS__)
 
-void call_event(int type, const char *frmt, ...);
+void call_log_event(int type, const char *frmt, ...);
 
 #endif

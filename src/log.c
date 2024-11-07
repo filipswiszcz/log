@@ -1,12 +1,8 @@
 #include "log.h"
 
 
-#ifdef LOG_IN_FILE
-// TODO init global queue?
-#endif
-
-queue queue_init() {
-    queue q = {
+log_queue log_queue_init() {
+    log_queue q = {
         .front = NULL,
         .rear = NULL,
         .size = 0,
@@ -14,26 +10,26 @@ queue queue_init() {
     return q;
 }
 
-bool is_queue_empty(queue* q) {
+bool is_log_queue_empty(log_queue* q) {
     return q -> front == NULL;
 }
 
-int queue_size(queue* q) {
+int log_queue_size(log_queue* q) {
     return q -> size;
 }
 
-log_event* queue_peek(queue* q) {
-    if (is_queue_empty(q)) return NULL;
+log_event* log_queue_peek(log_queue* q) {
+    if (is_log_queue_empty(q)) return NULL;
     return q -> front -> evt;
 }
 
-void enqueue(queue* q, log_event evt) {
-    queue_node* nnod = malloc(sizeof(queue_node));
+void log_enqueue(log_queue* q, log_event evt) {
+    log_queue_node* nnod = malloc(sizeof(log_queue_node));
     log_event* nevt = malloc(sizeof(log_event));
     *nevt = evt;
     nnod -> evt = nevt;
     nnod -> next = NULL;
-    if (is_queue_empty(q)) {
+    if (is_log_queue_empty(q)) {
         q -> front = nnod;
         q -> rear = nnod;
     } else {
@@ -43,13 +39,13 @@ void enqueue(queue* q, log_event evt) {
     q -> size++;
 }
 
-log_event* dequeue(queue* q) { // TODO remember to free(evt) event after use
-    if (is_queue_empty(q)) return NULL;
-    queue_node* nnod = q -> front;
+log_event* log_dequeue(log_queue* q) { // TODO remember to free(evt) event after use
+    if (is_log_queue_empty(q)) return NULL;
+    log_queue_node* nnod = q -> front;
     log_event* evt = q -> front -> evt;
     q -> front = q -> front -> next;
     q -> size--;
-    if (is_queue_empty(q)) q -> rear = NULL;
+    if (is_log_queue_empty(q)) q -> rear = NULL;
     free(nnod);
     return evt;
 }
@@ -64,7 +60,7 @@ static const char *type_colors[] = {
 };
 #endif
 
-static void print_msg(log_event *evt) {
+static void print_log_content(log_event *evt) {
     char buf[20];
     buf[strftime(buf, sizeof(buf), "%Y/%m/%d %H:%M:%S", evt -> time)] = '\0';
 #ifdef LOG_USE_COLOR
@@ -83,14 +79,28 @@ static void print_msg(log_event *evt) {
         evt -> frmt
     );
 #endif
+#ifdef LOG_IN_FILE
+    FILE *file = fopen(LOG_FILE_PATH, "a");
+    if (file == NULL) {
+        printf("Log file not found!\n");
+        return;
+    }
+    fprintf(
+        file,
+        "%s [%s] %s\n",
+        buf,
+        type_names[evt -> type],
+        evt -> frmt
+    );
+#endif
 }
 
-void call_event(int type, const char *frmt, ...) {
+void call_log_event(int type, const char *frmt, ...) {
     time_t t = time(NULL);
     log_event evt = {
         .type = type,
         .frmt = frmt,
         .time = localtime(&t),
     };
-    print_msg(&evt);
+    print_log_content(&evt);
 }
