@@ -102,5 +102,20 @@ void call_log_event(int type, const char *frmt, ...) {
         .frmt = frmt,
         .time = localtime(&t),
     };
+
+    va_list args;
+    va_start(args, frmt);
+
+    while (*frmt) {
+        if (*frmt == '%') {
+            frmt++;
+            if (*frmt == 'd') {
+                printf("%d", va_arg(args, int));
+            }
+        } else frmt++;
+    }
+
+    va_end(args);
+
     print_log_content(&evt);
 }
