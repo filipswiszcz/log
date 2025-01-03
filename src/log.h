@@ -1,10 +1,12 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include <stdio.h>
 #include <stdarg.h>
-#include <stdlib.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
 #include <string.h>
 #include <time.h>
 
@@ -12,9 +14,27 @@
 
 typedef struct {
     int type;
-    const char* frmt;
+    const char *frmt;
     struct tm *time;
 } log_event;
+
+typedef struct str_builder str_builder_t;
+
+struct str_builder {
+    char *content;
+    size_t alloc;
+    size_t len;
+};
+
+str_builder_t *str_builder_init(void);
+
+void str_builder_destroy(str_builder_t *b);
+
+void str_builder_add_char(str_builder_t *b, char c);
+
+void str_builder_add_str(str_builder_t *b, const char *s, size_t l);
+
+const char *str_builder_peek(const str_builder_t *b);
 
 typedef struct log_queue_node log_queue_node;
 
