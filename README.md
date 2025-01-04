@@ -12,7 +12,12 @@ This results with output like this:
 ```
 2024/10/26 01:02:24 [DEBUG] you're quite the silver tongue devil, aren't you?
 ```
-### LOG_IN_FILE
-Compile with ```-DLOG_IN_FILE``` to write output to a file (path defined in [log.h](https://github.com/filipswiszcz/log/blob/master/src/log.h))
+### LOG_USE_BUILDER
+Compile with ```-DLOG_USE_BUILDER``` to use format specifiers
+```
+log_info("you're quite the %s tongue devil, aren't you?", "silver");
+```
+### LOG_USE_FILE
+Compile with ```-DLOG_USE_FILE``` to write output to a file (path defined in [log.h](https://github.com/filipswiszcz/log/blob/master/src/log.h))
 ### LOG_USE_COLOR
 Compile with ```-DLOG_USE_COLOR``` to use ANSI color escape codes when printing

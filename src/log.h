@@ -34,32 +34,34 @@ void str_builder_add_char(str_builder_t *b, char c);
 
 void str_builder_add_str(str_builder_t *b, const char *s, size_t l);
 
-const char *str_builder_peek(const str_builder_t *b);
+void str_builder_add_int(str_builder_t *b, int i);
+
+char *str_builder_get(str_builder_t *b);
 
 typedef struct log_queue_node log_queue_node;
 
 struct log_queue_node {
-    log_event* evt;
-    log_queue_node* next;
+    log_event *evt;
+    log_queue_node *next;
 };
 
 typedef struct {
-    log_queue_node* front;
-    log_queue_node* rear;
+    log_queue_node *front;
+    log_queue_node *rear;
     int size;
 } log_queue;
 
 log_queue log_queue_init();
 
-bool is_log_queue_empty(log_queue* q);
+bool is_log_queue_empty(log_queue *q);
 
-int log_queue_size(log_queue* q);
+int log_queue_size(log_queue *q);
 
-log_event* log_queue_peek(log_queue* q);
+log_event *log_queue_peek(log_queue *q);
 
-void log_enqueue(log_queue* q, log_event evt);
+void log_enqueue(log_queue *q, log_event evt);
 
-log_event* log_dequeue(log_queue* q);
+log_event *log_dequeue(log_queue *q);
 
 enum { DEBUG, INFO, WARN, FATAL };
 
@@ -68,6 +70,6 @@ enum { DEBUG, INFO, WARN, FATAL };
 #define log_warn(...) call_log_event(WARN, __VA_ARGS__)
 #define log_fatal(...) call_log_event(FATAL, __VA_ARGS__)
 
-void call_log_event(int type, const char *frmt, ...);
+void call_log_event(int type, char *frmt, ...);
 
 #endif

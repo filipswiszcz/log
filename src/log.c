@@ -44,9 +44,27 @@ void str_builder_add_str(str_builder_t *b, const char *s, size_t l) {
     b -> content[b -> len] = '\0';
 }
 
-const char *str_builder_peek(const str_builder_t *b) {
+void str_builder_add_int(str_builder_t *b, int v) {
+    if (b == NULL) return;
+    char s[12];
+    snprintf(s, sizeof(s), "%d", v);
+    str_builder_add_str(b, s, 0);
+}
+
+void str_builder_add_double(str_builder_t *b, double v) {
+    if (b == NULL) return;
+    int l = snprintf(NULL, 0, "%g", v);
+    char s[l + 1];
+    snprintf(s, sizeof(s), "%g", v);
+    str_builder_add_str(b, s, 0);
+}
+
+char *str_builder_get(str_builder_t *b) {
+    char *s;
     if (b == NULL) return NULL;
-    return b -> content;
+    s = malloc(b -> len + 1);
+    memcpy(s, b -> content, b -> len + 1);
+    return s;
 }
 
 log_queue log_queue_init() {
@@ -58,7 +76,7 @@ log_queue log_queue_init() {
     return q;
 }
 
-bool is_log_queue_empty(log_queue* q) {
+bool is_log_queue_empty(log_queue *q) {
     return q -> front == NULL;
 }
 
@@ -66,12 +84,12 @@ int log_queue_size(log_queue* q) {
     return q -> size;
 }
 
-log_event* log_queue_peek(log_queue* q) {
+log_event* log_queue_peek(log_queue *q) {
     if (is_log_queue_empty(q)) return NULL;
     return q -> front -> evt;
 }
 
-void log_enqueue(log_queue* q, log_event evt) {
+void log_enqueue(log_queue *q, log_event evt) {
     log_queue_node* nnod = malloc(sizeof(log_queue_node));
     log_event* nevt = malloc(sizeof(log_event));
     *nevt = evt;
@@ -87,7 +105,7 @@ void log_enqueue(log_queue* q, log_event evt) {
     q -> size++;
 }
 
-log_event* log_dequeue(log_queue* q) { // TODO remember to free(evt) event after use
+log_event *log_dequeue(log_queue *q) { // TODO remember to free(evt) event after use
     if (is_log_queue_empty(q)) return NULL;
     log_queue_node* nnod = q -> front;
     log_event* evt = q -> front -> evt;
@@ -127,7 +145,7 @@ static void print_log_content(log_event *evt) {
         evt -> frmt
     );
 #endif
-#ifdef LOG_IN_FILE
+#ifdef LOG_USE_FILE
     FILE *file = fopen(LOG_FILE_PATH, "a");
     if (file == NULL) {
         printf("Log file not found!\n");
@@ -143,35 +161,26 @@ static void print_log_content(log_event *evt) {
 #endif
 }
 
-void call_log_event(int type, const char *frmt, ...) {
-    time_t t = time(NULL);
-    log_event evt = {
-        .type = type,
-        .frmt = frmt,
-        .time = localtime(&t),
-    };
-
+void call_log_event(int type, char *frmt, ...) {
+    char *cont = frmt;
+#ifdef LOG_USE_BUILDER
     va_list args;
     char *p, *sval;
     int ival;
     double dval;
-
     str_builder_t *builder;
     builder = str_builder_init();
-
     va_start(args, frmt);
     for (p = frmt; *p; p++) {
         if (*p != '%') {
-            putchar(*p); continue;
+            str_builder_add_char(builder, *p); continue;
         }
         switch (*++p) {
             case 'd':
-                ival = va_arg(args, int);
-                // printf("%d", ival);
+                str_builder_add_int(builder, va_arg(args, int));
                 break;
             case 'f':
-                dval = va_arg(args, double);
-                // printf("%f", dval);
+                str_builder_add_double(builder, va_arg(args, double));
                 break;
             case 's':
                 for (sval = va_arg(args, char*); *sval; sval++) {
@@ -179,14 +188,19 @@ void call_log_event(int type, const char *frmt, ...) {
                 }
                 break;
             default:
-                putchar(*p);
+                str_builder_add_char(builder, *p);
                 break;
         }
     }
     va_end(args);
-
-    printf("\ncontent: [%s]\n", str_builder_peek(builder));
+    cont = str_builder_get(builder);
     str_builder_destroy(builder);
-
+#endif
+    time_t t = time(NULL);
+    log_event evt = {
+        .type = type,
+        .frmt = cont,
+        .time = localtime(&t),
+    };
     print_log_content(&evt);
 }
