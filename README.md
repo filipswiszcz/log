@@ -1,7 +1,7 @@
 # log
 Logging library implemented in C99
 ## Usage
-Drop [log.h](https://github.com/filipswiszcz/log/blob/master/src/log.h) and [log.c](https://github.com/filipswiszcz/log/blob/master/src/log.c) into a project, use and compile
+Copy [log.h](https://github.com/filipswiszcz/log/blob/master/src/log.h) and [log.c](https://github.com/filipswiszcz/log/blob/master/src/log.c) into a project
 ```
 log_debug(...);
 log_info(...);
@@ -17,7 +17,22 @@ Compile with ```-DLOG_USE_BUILDER``` to use format specifiers
 ```
 log_info("you're quite the %s tongue devil, aren't you?", "silver");
 ```
+Format specifiers:
+
+| Character     | Argument type               |
+| ------------- | --------------------------- |
+| d, i          | int; decimal                |
+| o             | int; unsigned octal         |
+| x, X          | int; unsigned hexadecimal   |
+| u             | int; unsigned decimal       |
+| c             | int; single character       |
+| s             | char *; string until \0     |
+| f             | double; [-]m.dddddd         |
+| e, E          | double; [-]m.dddddd[e/E]±xx |
+| g, G          | double; chooses %f or %e    |
+| p             | void *; pointer             |
+
 ### LOG_USE_FILE
 Compile with ```-DLOG_USE_FILE``` to write output to a file (path defined in [log.h](https://github.com/filipswiszcz/log/blob/master/src/log.h))
 ### LOG_USE_COLOR
-Compile with ```-DLOG_USE_COLOR``` to use ANSI color escape codes when printing
+Compile with ```-DLOG_USE_COLOR``` to use ANSI color escape codes

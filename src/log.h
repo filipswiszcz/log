@@ -32,9 +32,11 @@ void str_builder_destroy(str_builder_t *b);
 
 void str_builder_add_char(str_builder_t *b, char c);
 
-void str_builder_add_str(str_builder_t *b, const char *s, size_t l);
+void str_builder_add_str(str_builder_t *b, char *s, size_t l);
 
 void str_builder_add_int(str_builder_t *b, int i);
+
+void str_builder_add_double(str_builder_t *b, double v);
 
 char *str_builder_get(str_builder_t *b);
 

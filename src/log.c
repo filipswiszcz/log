@@ -35,13 +35,20 @@ void str_builder_add_char(str_builder_t *b, char c) {
     b -> content[b -> len] = '\0';
 }
 
-void str_builder_add_str(str_builder_t *b, const char *s, size_t l) {
+void str_builder_add_str(str_builder_t *b, char *s, size_t l) {
     if (b == NULL || s == NULL || *s == '\0') return;
     if (l == 0) l = strlen(s);
     str_builder_check_space(b, l);
     memmove(b -> content + b -> len, s, l);
     b -> len += l;
     b -> content[b -> len] = '\0';
+}
+
+void str_builder_add_void(str_builder_t *b, void *p) {
+    if (b == NULL) return;
+    char s[11];
+    snprintf(s, sizeof(s), "%p", p);
+    str_builder_add_str(b, s, 0);
 }
 
 void str_builder_add_int(str_builder_t *b, int v) {
@@ -51,11 +58,55 @@ void str_builder_add_int(str_builder_t *b, int v) {
     str_builder_add_str(b, s, 0);
 }
 
+void str_builder_add_unsigned_int(str_builder_t *b, int v) {
+    if (b == NULL) return;
+    char s[12];
+    snprintf(s, sizeof(s), "%u", v);
+    str_builder_add_str(b, s, 0);
+}
+
+void str_builder_add_octal(str_builder_t *b, int v) {
+    if (b == NULL) return;
+    char s[12];
+    snprintf(s, sizeof(s), "%o", v);
+    str_builder_add_str(b, s, 0);
+}
+
+void str_builder_add_hex(str_builder_t *b, int v, int up) {
+    if (b == NULL) return;
+    char s[12];
+    if (!up) snprintf(s, sizeof(s), "%x", v);
+    else snprintf(s, sizeof(s), "%X", v);
+    str_builder_add_str(b, s, 0);
+}
+
 void str_builder_add_double(str_builder_t *b, double v) {
     if (b == NULL) return;
-    int l = snprintf(NULL, 0, "%g", v);
+    int l = snprintf(NULL, 0, "%f", v);
     char s[l + 1];
-    snprintf(s, sizeof(s), "%g", v);
+    snprintf(s, sizeof(s), "%f", v);
+    str_builder_add_str(b, s, 0);
+}
+
+void str_builder_add_double_sn(str_builder_t *b, double v, int up) {
+    if (b == NULL) return;
+    int l;
+    if (!up) l = snprintf(NULL, 0, "%e", v);
+    else l = snprintf(NULL, 0, "%E", v);
+    char s[l + 1];
+    if (!up) snprintf(s, sizeof(s), "%e", v);
+    else snprintf(s, sizeof(s), "%E", v);
+    str_builder_add_str(b, s, 0);
+}
+
+void str_builder_add_double_csn(str_builder_t *b, double v, int up) {
+    if (b == NULL) return;
+    int l;
+    if (!up) l = snprintf(NULL, 0, "%g", v);
+    else l = snprintf(NULL, 0, "%G", v);
+    char s[l + 1];
+    if (!up) snprintf(s, sizeof(s), "%g", v);
+    else snprintf(s, sizeof(s), "%G", v);
     str_builder_add_str(b, s, 0);
 }
 
@@ -179,16 +230,50 @@ void call_log_event(int type, char *frmt, ...) {
             case 'd':
                 str_builder_add_int(builder, va_arg(args, int));
                 break;
+            case 'i':
+                str_builder_add_int(builder, va_arg(args, int));
+                break;
+            case 'o':
+                str_builder_add_octal(builder, va_arg(args, int));
+                break;
+            case 'x':
+                str_builder_add_hex(builder, va_arg(args, int), 0);
+                break;
+            case 'X':
+                str_builder_add_hex(builder, va_arg(args, int), 1);
+                break;
+            case 'u':
+                str_builder_add_unsigned_int(builder, va_arg(args, int));
+                break;
+            case 'c':
+                str_builder_add_char(builder, va_arg(args, int));
+                break;
+            case 's':
+                str_builder_add_str(builder, va_arg(args, char*), 0);
+                // for (sval = va_arg(args, char*); *sval; sval++) {
+                //     str_builder_add_char(builder, *sval);
+                // }
+                break;
             case 'f':
                 str_builder_add_double(builder, va_arg(args, double));
                 break;
-            case 's':
-                for (sval = va_arg(args, char*); *sval; sval++) {
-                    str_builder_add_char(builder, *sval);
-                }
+            case 'e':
+                str_builder_add_double_sn(builder, va_arg(args, double), 0);
+                break;
+            case 'E':
+                str_builder_add_double_sn(builder, va_arg(args, double), 1);
+                break;
+            case 'g':
+                str_builder_add_double_csn(builder, va_arg(args, double), 0);
+                break;
+            case 'G':
+                str_builder_add_double_csn(builder, va_arg(args, double), 1);
+                break;
+            case 'p':
+                str_builder_add_void(builder, va_arg(args, void*));
                 break;
             default:
-                str_builder_add_char(builder, *p);
+                str_builder_add_char(builder, *--p);
                 break;
         }
     }
