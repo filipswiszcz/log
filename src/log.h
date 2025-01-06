@@ -12,33 +12,33 @@
 
 #define LOG_FILE_PATH "/var/log/run.log"
 
+typedef struct str_builder str_builder;
+
+struct str_builder {
+    char *content;
+    size_t capacity;
+    size_t len;
+};
+
+str_builder *str_builder_init(void);
+
+void str_builder_destroy(str_builder *b);
+
+void str_builder_add_char(str_builder *b, char c);
+
+void str_builder_add_str(str_builder *b, char *s, size_t l);
+
+void str_builder_add_int(str_builder *b, int i);
+
+void str_builder_add_double(str_builder *b, double v);
+
+char *str_builder_get(str_builder *b);
+
 typedef struct {
     int type;
     const char *frmt;
     struct tm *time;
 } log_event;
-
-typedef struct str_builder str_builder_t;
-
-struct str_builder {
-    char *content;
-    size_t alloc;
-    size_t len;
-};
-
-str_builder_t *str_builder_init(void);
-
-void str_builder_destroy(str_builder_t *b);
-
-void str_builder_add_char(str_builder_t *b, char c);
-
-void str_builder_add_str(str_builder_t *b, char *s, size_t l);
-
-void str_builder_add_int(str_builder_t *b, int i);
-
-void str_builder_add_double(str_builder_t *b, double v);
-
-char *str_builder_get(str_builder_t *b);
 
 typedef struct log_queue_node log_queue_node;
 
