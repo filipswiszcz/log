@@ -72,6 +72,6 @@ enum { DEBUG, INFO, WARN, FATAL };
 #define log_warn(...) call_log_event(WARN, __VA_ARGS__)
 #define log_fatal(...) call_log_event(FATAL, __VA_ARGS__)
 
-void call_log_event(int type, char *frmt, ...);
+void call_log_event(int type, const char *frmt, ...);
 
 #endif
